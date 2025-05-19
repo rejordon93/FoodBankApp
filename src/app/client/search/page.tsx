@@ -115,6 +115,10 @@ export default function Search() {
                       <strong>Type:</strong> {item.type}
                     </Typography>
                   )}
+                  <Typography>
+                    Would you like to:
+                    <Link href="/client/donate"> Donate</Link>
+                  </Typography>
                 </CardContent>
               </Card>
             ))}

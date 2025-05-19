@@ -59,7 +59,7 @@ export default function NavBar() {
 
           <Button
             component={Link}
-            href="/donate"
+            href="/client/donate"
             sx={{ color: "black", textTransform: "none" }}
           >
             Donate
