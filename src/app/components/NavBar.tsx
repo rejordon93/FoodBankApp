@@ -43,7 +43,7 @@ export default function NavBar() {
           </Button>
           <Button
             component={Link}
-            href="/about"
+            href="/client/aboutUs"
             sx={{ color: "black", textTransform: "none" }}
           >
             About Us
@@ -51,10 +51,10 @@ export default function NavBar() {
 
           <Button
             component={Link}
-            href="/services"
+            href="/client/services"
             sx={{ color: "black", textTransform: "none" }}
           >
-            Services
+            Search
           </Button>
 
           <Button
