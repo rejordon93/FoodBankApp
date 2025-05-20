@@ -14,4 +14,5 @@ export type SearchResult = {
   emial: string;
   business_hours: string;
   state_abbreviation: string;
+  id: number;
 };
