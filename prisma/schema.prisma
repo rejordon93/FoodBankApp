@@ -14,3 +14,14 @@ model User {
   password String
   createdAt DateTime @default(now())
 }
+
+model Profile {
+  id  Int @default(autoincrement())
+  firstName String
+  lastName String
+  email String @unique
+  phoneNumber String
+  dataOfBirth String
+  hasDonated String
+  address String
+}

@@ -16,3 +16,13 @@ export type SearchResult = {
   state_abbreviation: string;
   id: number;
 };
+
+export type ProfileProps = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  dataOfBirth: string;
+  hasDonated: string;
+  address: string;
+};
