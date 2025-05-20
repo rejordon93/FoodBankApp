@@ -10,6 +10,8 @@ import {
   Card,
   CardContent,
   Box,
+  Divider,
+  Chip,
 } from "@mui/material";
 import { z } from "zod";
 
@@ -69,13 +71,13 @@ export default function Search() {
   };
 
   return (
-    <Box sx={{ maxWidth: 700, mx: "auto", mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>
+    <Box sx={{ maxWidth: 800, mx: "auto", mt: 6, px: 3 }}>
+      <Typography variant="h4" gutterBottom textAlign="center">
         Search for Food Banks
       </Typography>
 
       <form onSubmit={handleSubmit}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
           <TextField
             label="City"
             variant="outlined"
@@ -94,7 +96,7 @@ export default function Search() {
             helperText={errors.state}
             fullWidth
           />
-          <Button type="submit" variant="contained" fullWidth>
+          <Button type="submit" variant="contained" size="large">
             Search
           </Button>
         </Box>
@@ -105,57 +107,44 @@ export default function Search() {
           <Typography variant="h5" gutterBottom>
             Results
           </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Divider sx={{ mb: 2 }} />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
             {results.map((item, index) => (
-              <Card key={index} variant="outlined">
+              <Card key={index} elevation={2}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
+                  <Typography variant="h6" gutterBottom color="primary">
                     {item.name || "No name available"}
                   </Typography>
-                  <Typography>
+
+                  <Typography variant="body2" gutterBottom>
                     <strong>Address:</strong> {item.full_address}
                   </Typography>
+
                   {item.business_hours && (
-                    <Typography>
+                    <Typography variant="body2" gutterBottom>
                       <strong>Hours:</strong> {item.business_hours}
                     </Typography>
                   )}
-                  {item.description && (
-                    <Typography>
-                      <strong>Description:</strong> {item.description}
-                    </Typography>
-                  )}
+
                   {item.website && (
-                    <Typography>
+                    <Typography variant="body2" gutterBottom>
                       <strong>Website:</strong>{" "}
                       <Link
                         href={item.website}
                         target="_blank"
                         rel="noopener noreferrer"
+                        style={{ color: "#1976d2" }}
                       >
                         {item.website}
                       </Link>
                     </Typography>
                   )}
-                  {item.details_url && (
-                    <Typography>
-                      <strong>More Info:</strong>{" "}
-                      <Link
-                        href={item.details_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Details
-                      </Link>
-                    </Typography>
-                  )}
+
                   {item.type && (
-                    <Typography>
-                      <strong>Type:</strong> {item.type}
-                    </Typography>
+                    <Chip label={item.type} color="secondary" sx={{ mt: 1 }} />
                   )}
-                  <Typography>
-                    Would you like to:
+
+                  <Box mt={2} display="flex" justifyContent="space-between">
                     <Link
                       href={{
                         pathname: `/client/search/${item.id}`,
@@ -171,10 +160,41 @@ export default function Search() {
                           business_hours: item.business_hours,
                         },
                       }}
+                      passHref
                     >
-                      Donate
+                      <Button variant="outlined" color="success" size="small">
+                        More Info
+                      </Button>
                     </Link>
-                  </Typography>
+                    <Link
+                      href={{
+                        pathname: `/client/donate/${item.id}`,
+                        query: {
+                          name: item.name,
+                          full_address: item.full_address,
+                          description: item.description,
+                          details_url: item.details_url,
+                          state_abbreviation: item.state_abbreviation,
+                          type: item.type,
+                          website: item.website,
+                          zipcode: item.zipcode,
+                          business_hours: item.business_hours,
+                        },
+                      }}
+                      passHref
+                    >
+                      <Button
+                        variant="outlined"
+                        color="success"
+                        size="small"
+                        component="a"
+                        href={"/client/donate"}
+                        rel="noopener noreferrer"
+                      >
+                        Donate
+                      </Button>
+                    </Link>
+                  </Box>
                 </CardContent>
               </Card>
             ))}
@@ -183,7 +203,12 @@ export default function Search() {
       )}
 
       {results.length === 0 && (
-        <Typography variant="body2" color="text.secondary" mt={3}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          mt={4}
+          textAlign="center"
+        >
           No results yet. Please enter a city and state to begin your search.
         </Typography>
       )}

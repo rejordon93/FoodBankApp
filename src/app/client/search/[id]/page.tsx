@@ -24,10 +24,10 @@ export default function Page() {
   const zipcode = searchParams.get("zipcode");
   const business_hours = searchParams.get("business_hours");
 
-  const reuter = useRouter();
+  const router = useRouter();
 
   const handleButton = () => {
-    reuter.push("/");
+    router.push("/");
   };
 
   return (
@@ -60,8 +60,9 @@ export default function Page() {
               Type
             </Typography>
             <Typography variant="body2">{type}</Typography>
+
             <Typography variant="subtitle2" sx={{ mt: 1 }}>
-              Business_hours
+              Business Hours
             </Typography>
             <Typography variant="body2">{business_hours}</Typography>
 
@@ -94,9 +95,14 @@ export default function Page() {
                 >
                   View More
                 </Link>
-                <Button onClick={handleButton}> Back</Button>
               </>
             )}
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
+              <Button variant="contained" onClick={handleButton}>
+                Back
+              </Button>
+            </Box>
           </Box>
         </CardContent>
       </Card>
