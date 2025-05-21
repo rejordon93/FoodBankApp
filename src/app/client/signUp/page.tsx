@@ -71,7 +71,7 @@ export default function SignUp() {
       setPassword("");
       setOpen(true);
       setTimeout(() => {
-        router.push("/login");
+        router.push("/client/login");
       }, 1000);
     } catch (error: unknown) {
       alert("An unexpected error occurred.");

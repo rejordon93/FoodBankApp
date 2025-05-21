@@ -23,15 +23,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await prisma.user.update({
-      where: {
-        email,
-      },
-      data: {
-        isOnline: true,
-      },
-    });
-
     const validPassword = await bcryptjs.compare(password, user.password);
     if (!validPassword) {
       return NextResponse.json({ error: "Invalid password" }, { status: 400 });

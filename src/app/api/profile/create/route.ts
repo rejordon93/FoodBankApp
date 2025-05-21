@@ -1,33 +1,42 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/database/prisma";
 import { verifyToken } from "@/helpers/getToken";
-import { z } from "zod";
-
-// ✅ Define schema with Zod
-const profileSchema = z.object({
-  firstName: z.string().min(1),
-  lastName: z.string().min(1),
-  email: z.string().email(),
-  phoneNumber: z.string().min(7),
-  dataOfBirth: z.string(),
-  hasDonated: z.string(),
-  address: z.string().min(1),
-});
 
 export async function POST(req: NextRequest) {
   try {
+    const body = await req.json();
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      dataOfBirth,
+      hasDonated,
+      address,
+    } = body;
+
+    if (
+      !firstName ||
+      !lastName ||
+      !email ||
+      !phoneNumber ||
+      !dataOfBirth ||
+      !hasDonated ||
+      !address
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
     const user = verifyToken(req);
     if (!user) {
       return NextResponse.json({ error: "No user logged in" }, { status: 401 });
     }
 
-    const json = await req.json();
-
-    // ✅ Validate input
-    const parsed = profileSchema.parse(json);
-
     const existingProfile = await prisma.profile.findUnique({
-      where: { email: parsed.email },
+      where: { email },
     });
 
     if (existingProfile) {
@@ -38,18 +47,20 @@ export async function POST(req: NextRequest) {
     }
 
     const newProfile = await prisma.profile.create({
-      data: parsed,
+      data: {
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        dataOfBirth,
+        hasDonated,
+        address,
+        userId: user.id,
+      },
     });
 
     return NextResponse.json(newProfile, { status: 201 });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Validation failed", issues: error.errors },
-        { status: 400 }
-      );
-    }
-
     console.error("Something went wrong:", error);
     return NextResponse.json(
       { error: "Internal server error" },

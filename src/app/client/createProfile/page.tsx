@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const profileSchema = z.object({
   firstname: z.string().min(1, "First name is required"),
@@ -48,8 +49,8 @@ export default function CreateProfile() {
       firstname,
       lastname,
       email,
-      phoneNumber,
-      dataOfBirth,
+      phone: phoneNumber,
+      birth: dataOfBirth,
       address,
       hasDonated,
     });
@@ -61,30 +62,39 @@ export default function CreateProfile() {
           fieldErrors[err.path[0] as string] = err.message;
         }
       });
-      const res = await axios.post("/api/profile/create", {
-        firstname,
-        lastname,
-        address,
-        hasDonated,
-        phoneNumber,
-        dataOfBirth,
-        email,
-      });
-      console.log(res.data);
-      router.push("/client/profile");
       setErrors(fieldErrors);
     } else {
-      console.log("Submitted:", result.data);
-      setErrors({});
-      setSuccessOpen(true);
-      // Reset form
-      setFirstName("");
-      setLastName("");
-      setEmail("");
-      setPhoneNumber("");
-      setDataOfBirth("");
-      setAddress("");
-      setHasDonated("");
+      try {
+        const res = await axios.post("/api/profile/create", {
+          firstName: firstname,
+          lastName: lastname,
+          email,
+          phoneNumber,
+          dataOfBirth,
+          address,
+          hasDonated,
+        });
+
+        console.log("Submitted:", res.data);
+        setErrors({});
+        setSuccessOpen(true);
+
+        // Reset form
+        setFirstName("");
+        setLastName("");
+        setEmail("");
+        setPhoneNumber("");
+        setDataOfBirth("");
+        setAddress("");
+        setHasDonated("");
+
+        setTimeout(() => {
+          router.push("/client/profile");
+        }, 1000);
+      } catch (error: unknown) {
+        console.error("Submission error:", error);
+        setErrors({ email: "Submission failed. Try again." });
+      }
     }
   };
 

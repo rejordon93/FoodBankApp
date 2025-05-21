@@ -3,25 +3,44 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // or mysql, sqlite, etc.
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String
-  email    String @unique
-  password String
-  createdAt DateTime @default(now())
+  id        Int       @id @default(autoincrement())
+  username  String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+
+  profile   Profile?
+  donations Donation[]
 }
 
 model Profile {
-  id  Int @default(autoincrement())
-  firstName String
-  lastName String
-  email String @unique
-  phoneNumber String
-  dataOfBirth String
-  hasDonated String
-  address String
+  id           Int     @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  userId       Int     @unique
+  email        String  @unique
+  phoneNumber  String
+  dataOfBirth  String
+  hasDonated   String
+  address      String
+  user         User    @relation(fields: [userId], references: [id])
+}
+
+model Donation {
+  id          String   @id @default(uuid())
+  donorId     Int
+  donor       User     @relation(fields: [donorId], references: [id])
+  item        String
+  quantity    Int
+  unit        String    // e.g., "kg", "cans", "boxes"
+  date        DateTime @default(now())
+  status      String    // e.g., "pending", "received", "cancelled"
+  pickupTime  DateTime? // optional
+  notes       String?
+  foodBank    String? // this will have foodbank name if there is one
 }
