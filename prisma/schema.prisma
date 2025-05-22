@@ -32,7 +32,7 @@ model Profile {
 }
 
 model Donation {
-  id          String   @id @default(uuid())
+  id          Int  @id @default(autoincrement())
   donorId     Int
   donor       User     @relation(fields: [donorId], references: [id])
   item        String

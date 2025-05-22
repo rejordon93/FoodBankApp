@@ -26,3 +26,15 @@ export type ProfileProps = {
   hasDonated: string;
   address: string;
 };
+
+export type Image = {
+  url: string;
+};
+
+export type donateCartProps = {
+  name: string;
+  images: Image[];
+  shortDescription: string;
+  image?: string;
+  hits: string[];
+};
