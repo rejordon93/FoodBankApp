@@ -31,6 +31,25 @@ model Profile {
   user         User    @relation(fields: [userId], references: [id])
 }
 
+model FoodBank {
+  id          Int      @id @default(autoincrement())
+  name        String
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  phone       String?
+  email       String?
+  website     String?
+  description String?
+  timeOpen    DateTime
+  timeClose   DateTime?
+  daysOpen    String?
+  latitude    Float?
+  longitude   Float?
+}
+
+
 model Donation {
   id          Int  @id @default(autoincrement())
   donorId     Int
