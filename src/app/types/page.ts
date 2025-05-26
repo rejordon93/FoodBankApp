@@ -38,3 +38,16 @@ export type donateCartProps = {
   image?: string;
   hits: string[];
 };
+export type FoodBank = {
+  id: string;
+  name: string;
+  address: string;
+  state: string;
+  zipCode: string;
+  phone: string;
+  email: string;
+  website: string;
+  timeOpen: string | Date;
+  timeClose: string | Date;
+  daysOpen: string;
+};

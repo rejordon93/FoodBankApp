@@ -1,111 +1,80 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import {
   Container,
   Card,
   CardContent,
   Typography,
-  Link,
   Box,
+  Divider,
   Button,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import Donate from "../../donate/page";
+import Link from "next/link";
 
-export default function Page() {
+export default function SearchId() {
+  const params = useParams();
   const searchParams = useSearchParams();
+
+  const id = params.id;
   const name = searchParams.get("name");
-  const full_address = searchParams.get("full_address");
-  const description = searchParams.get("description");
-  const details_url = searchParams.get("details_url");
-  const state_abbreviation = searchParams.get("state_abbreviation");
-  const type = searchParams.get("type");
+  const address = searchParams.get("address");
+  const email = searchParams.get("email");
+  const phone = searchParams.get("phone");
   const website = searchParams.get("website");
-  const zipcode = searchParams.get("zipcode");
-  const business_hours = searchParams.get("business_hours");
+  const state = searchParams.get("state");
+  const daysOpen = searchParams.get("daysOpen");
 
-  const router = useRouter();
-
-  const handleButton = () => {
-    router.push("/");
-  };
-
+  console.log(id);
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Card elevation={3}>
-        <CardContent>
-          <Typography variant="h5" gutterBottom>
-            {name || "No Name Provided"}
-          </Typography>
+    <Container maxWidth="md" sx={{ mt: 6 }}>
+      <Card sx={{ p: 3, boxShadow: 3 }}>
+        <Box sx={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+          {/* Info Section */}
+          <Box sx={{ flex: 1, minWidth: "300px" }}>
+            <CardContent>
+              <Typography variant="h4" gutterBottom>
+                Food Bank Info
+              </Typography>
 
-          <Typography variant="body1" color="text.secondary" gutterBottom>
-            {description || "No Description"}
-          </Typography>
+              <Divider sx={{ mb: 2 }} />
 
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle2">Address</Typography>
-            <Typography variant="body2">{full_address}</Typography>
-
-            <Typography variant="subtitle2" sx={{ mt: 1 }}>
-              State
-            </Typography>
-            <Typography variant="body2">{state_abbreviation}</Typography>
-
-            <Typography variant="subtitle2" sx={{ mt: 1 }}>
-              Zip Code
-            </Typography>
-            <Typography variant="body2">{zipcode}</Typography>
-
-            <Typography variant="subtitle2" sx={{ mt: 1 }}>
-              Type
-            </Typography>
-            <Typography variant="body2">{type}</Typography>
-
-            <Typography variant="subtitle2" sx={{ mt: 1 }}>
-              Business Hours
-            </Typography>
-            <Typography variant="body2">{business_hours}</Typography>
-
-            {website && (
-              <>
-                <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                  Website
-                </Typography>
-                <Link
-                  href={website}
-                  target="_blank"
-                  rel="noopener"
-                  underline="hover"
-                >
-                  {website}
-                </Link>
-              </>
-            )}
-
-            {details_url && (
-              <>
-                <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                  Details
-                </Typography>
-                <Link
-                  href={details_url}
-                  target="_blank"
-                  rel="noopener"
-                  underline="hover"
-                >
-                  View More
-                </Link>
-              </>
-            )}
-
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3 }}>
-              <Button variant="contained" onClick={handleButton}>
-                Back
-              </Button>
-            </Box>
+              <Info label="Name" value={name} />
+              <Info label="Address" value={address} />
+              <Info label="Email" value={email} />
+              <Info label="Phone" value={phone} />
+              <Info label="Website" value={website} />
+              <Info label="State" value={state} />
+              <Info label="Days Open" value={daysOpen} />
+            </CardContent>
           </Box>
-        </CardContent>
+
+          {/* Donate Section */}
+          <Box sx={{ flex: 1, minWidth: "300px", mt: 3 }}>
+            <Typography variant="h5" gutterBottom>
+              Donate
+            </Typography>
+            <Donate />
+          </Box>
+        </Box>
+        <Button>
+          <Link href="/profile">Finished</Link>{" "}
+        </Button>
       </Card>
     </Container>
+  );
+}
+
+function Info({ label, value }: { label: string; value: string | null }) {
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle2" color="text.secondary">
+        {label}
+      </Typography>
+      <Typography variant="body1" fontWeight={500}>
+        {value || "N/A"}
+      </Typography>
+    </Box>
   );
 }

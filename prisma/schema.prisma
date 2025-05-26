@@ -8,14 +8,14 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  username  String
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-
-  profile   Profile?
-  donations Donation[]
+  id         Int        @id @default(autoincrement())
+  username   String
+  email      String     @unique
+  password   String
+  createdAt  DateTime   @default(now())
+  profile    Profile?
+  donations  Donation[]
+    foodItems FoodItem[]
 }
 
 model Profile {
@@ -45,21 +45,22 @@ model FoodBank {
   timeOpen    DateTime
   timeClose   DateTime?
   daysOpen    String?
-  latitude    Float?
-  longitude   Float?
+  userId  Int?
 }
 
+model FoodItem {
+  id       String   @id @default(uuid())
+  name     String
+  quantity Int
+  userId   Int
+  user     User     @relation(fields: [userId], references: [id])
+}
 
 model Donation {
-  id          Int  @id @default(autoincrement())
-  donorId     Int
-  donor       User     @relation(fields: [donorId], references: [id])
-  item        String
-  quantity    Int
-  unit        String    // e.g., "kg", "cans", "boxes"
-  date        DateTime @default(now())
-  status      String    // e.g., "pending", "received", "cancelled"
-  pickupTime  DateTime? // optional
-  notes       String?
-  foodBank    String? // this will have foodbank name if there is one
+  id        Int      @id @default(autoincrement())
+  userId   Int
+  donor     User     @relation(fields: [userId], references: [id])
+  item      String
+  quantity  Int
+  date      DateTime @default(now())
 }

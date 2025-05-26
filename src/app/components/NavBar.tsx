@@ -51,7 +51,7 @@ export default function NavBar() {
 
           <Button
             component={Link}
-            href="/client/services"
+            href="/client/search"
             sx={{ color: "black", textTransform: "none" }}
           >
             Search

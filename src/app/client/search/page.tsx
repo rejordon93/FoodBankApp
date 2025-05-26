@@ -1,217 +1,189 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { SearchResult } from "@/app/types/page";
+import { Box, Button, Typography } from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { TextField, InputAdornment } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
 import Link from "next/link";
-import {
-  Typography,
-  Button,
-  TextField,
-  Card,
-  CardContent,
-  Box,
-  Divider,
-  Chip,
-} from "@mui/material";
-import { z } from "zod";
-
-// Zod schema for validation
-const searchSchema = z.object({
-  city: z.string().min(1, "City is required"),
-  state: z
-    .string()
-    .min(2, "State should be 2 letters")
-    .max(2, "State should be 2 letters"),
-});
-
-// Capitalize function
-const capitalizeFirstLetter = (text: string) =>
-  text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+import { FoodBank } from "@/app/types/page";
 
 export default function Search() {
-  const [state, setState] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [errors, setErrors] = useState<{ city?: string; state?: string }>({});
+  const [apiDatas, setApiDatas] = useState<FoodBank[]>([]);
+  const [visibleCount, setVisibleCount] = useState(10);
+  const [search, setSearch] = useState<string>("");
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("/api/search/get");
+        console.log(res.data);
+        setApiDatas(res.data as FoodBank[]);
+      } catch (error) {
+        console.error("Error fetching food banks:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
-    const formattedCity = capitalizeFirstLetter(city.trim());
-    const formattedState = state.trim().toUpperCase();
+  // Filter the data based on search input (case insensitive)
+  const filteredData = apiDatas.filter((fb) => {
+    const lowerSearch = search.toLowerCase();
 
-    const validation = searchSchema.safeParse({
-      city: formattedCity,
-      state: formattedState,
-    });
+    return (
+      fb.name.toLowerCase().includes(lowerSearch) ||
+      fb.address.toLowerCase().includes(lowerSearch) ||
+      fb.state.toLowerCase().includes(lowerSearch) ||
+      fb.zipCode.toLowerCase().includes(lowerSearch) ||
+      fb.phone.toLowerCase().includes(lowerSearch) ||
+      fb.email.toLowerCase().includes(lowerSearch)
+    );
+  });
 
-    if (!validation.success) {
-      const fieldErrors: { city?: string; state?: string } = {};
-      validation.error.errors.forEach((err) => {
-        const field = err.path[0] as keyof typeof fieldErrors;
-        fieldErrors[field] = err.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
-
-    setErrors({});
-
-    try {
-      const res = await axios.get("/api/search", {
-        params: { city: formattedCity, state: formattedState },
-      });
-      setResults(res.data as SearchResult[]);
-    } catch (err) {
-      console.error("Search failed", err);
-    }
-
-    setCity("");
-    setState("");
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + 9);
   };
 
-  return (
-    <Box sx={{ maxWidth: 800, mx: "auto", mt: 6, px: 3 }}>
-      <Typography variant="h4" gutterBottom textAlign="center">
-        Search for Food Banks
-      </Typography>
-
-      <form onSubmit={handleSubmit}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
-          <TextField
-            label="City"
-            variant="outlined"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            error={!!errors.city}
-            helperText={errors.city}
-            fullWidth
-          />
-          <TextField
-            label="State (e.g., WA)"
-            variant="outlined"
-            value={state}
-            onChange={(e) => setState(e.target.value)}
-            error={!!errors.state}
-            helperText={errors.state}
-            fullWidth
-          />
-          <Button type="submit" variant="contained" size="large">
-            Search
-          </Button>
-        </Box>
-      </form>
-
-      {results.length > 0 && (
-        <Box mt={4}>
-          <Typography variant="h5" gutterBottom>
-            Results
-          </Typography>
-          <Divider sx={{ mb: 2 }} />
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            {results.map((item, index) => (
-              <Card key={index} elevation={2}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom color="primary">
-                    {item.name || "No name available"}
-                  </Typography>
-
-                  <Typography variant="body2" gutterBottom>
-                    <strong>Address:</strong> {item.full_address}
-                  </Typography>
-
-                  {item.business_hours && (
-                    <Typography variant="body2" gutterBottom>
-                      <strong>Hours:</strong> {item.business_hours}
-                    </Typography>
-                  )}
-
-                  {item.website && (
-                    <Typography variant="body2" gutterBottom>
-                      <strong>Website:</strong>{" "}
-                      <Link
-                        href={item.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "#1976d2" }}
-                      >
-                        {item.website}
-                      </Link>
-                    </Typography>
-                  )}
-
-                  {item.type && (
-                    <Chip label={item.type} color="secondary" sx={{ mt: 1 }} />
-                  )}
-
-                  <Box mt={2} display="flex" justifyContent="space-between">
-                    <Link
-                      href={{
-                        pathname: `/client/search/${item.id}`,
-                        query: {
-                          name: item.name,
-                          full_address: item.full_address,
-                          description: item.description,
-                          details_url: item.details_url,
-                          state_abbreviation: item.state_abbreviation,
-                          type: item.type,
-                          website: item.website,
-                          zipcode: item.zipcode,
-                          business_hours: item.business_hours,
-                        },
-                      }}
-                      passHref
-                    >
-                      <Button variant="outlined" color="success" size="small">
-                        More Info
-                      </Button>
-                    </Link>
-                    <Link
-                      href={{
-                        pathname: `/client/donate/${item.id}`,
-                        query: {
-                          name: item.name,
-                          full_address: item.full_address,
-                          description: item.description,
-                          details_url: item.details_url,
-                          state_abbreviation: item.state_abbreviation,
-                          type: item.type,
-                          website: item.website,
-                          zipcode: item.zipcode,
-                          business_hours: item.business_hours,
-                        },
-                      }}
-                      passHref
-                    >
-                      <Button
-                        variant="outlined"
-                        color="success"
-                        size="small"
-                        component="a"
-                        href={"/client/donate"}
-                        rel="noopener noreferrer"
-                      >
-                        Donate
-                      </Button>
-                    </Link>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        </Box>
-      )}
-
-      {results.length === 0 && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          mt={4}
-          textAlign="center"
+  const columns: GridColDef[] = [
+    { field: "name", headerName: "Name", width: 180 },
+    { field: "address", headerName: "Address", width: 200 },
+    { field: "email", headerName: "Email", width: 200 },
+    { field: "phone", headerName: "Phone", width: 140 },
+    {
+      field: "website",
+      headerName: "Website",
+      width: 200,
+      renderCell: (params) => (
+        <a href={params.value} target="_blank" rel="noopener noreferrer">
+          {params.value}
+        </a>
+      ),
+    },
+    { field: "state", headerName: "State", width: 120 },
+    { field: "zipCode", headerName: "Zip", width: 120 },
+    { field: "daysOpen", headerName: "Days Open", width: 140 },
+    {
+      field: "timeOpen",
+      headerName: "Opens",
+      width: 120,
+      renderCell: (params) =>
+        new Date(params.value).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+    },
+    {
+      field: "timeClose",
+      headerName: "Closes",
+      width: 114,
+      renderCell: (params) =>
+        params.value
+          ? new Date(params.value).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "N/A",
+    },
+    {
+      field: "donate",
+      headerName: "Donate",
+      width: 120,
+      renderCell: (params) => (
+        <Link
+          href={{
+            pathname: `/client/search/${params.row.id}`,
+            query: {
+              name: params.row.name,
+              address: params.row.address,
+              email: params.row.email,
+              phone: params.row.phone,
+              website: params.row.website,
+              state: params.row.state,
+              zip: params.row.zip,
+              daysOpen: params.row.daysOpen,
+              opens: params.row.opens,
+              closes: params.row.closes,
+            },
+          }}
+          style={{ color: "#1976d2", textDecoration: "underline" }}
         >
-          No results yet. Please enter a city and state to begin your search.
+          Donate
+        </Link>
+      ),
+    },
+  ];
+
+  return (
+    <Box sx={{ px: 2, py: 4, display: "flex", justifyContent: "center" }}>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 1536,
+          mx: "auto",
+          boxSizing: "border-box",
+        }}
+      >
+        <Typography variant="h4" gutterBottom>
+          Food Bank Directory
         </Typography>
-      )}
+
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Search Food Banks"
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setVisibleCount(10);
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            sx: {
+              borderRadius: "12px",
+            },
+          }}
+          sx={{
+            mb: 3,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+            },
+          }}
+        />
+
+        <Box sx={{ height: 600, width: "100%" }}>
+          <DataGrid
+            rows={filteredData.slice(0, visibleCount)}
+            columns={columns}
+            hideFooter
+            getRowId={(row) => row.id}
+            disableRowSelectionOnClick
+          />
+        </Box>
+
+        {filteredData.length > 0 && (
+          <Box
+            sx={{
+              mt: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              maxWidth: "100%",
+            }}
+          >
+            {visibleCount < filteredData.length ? (
+              <Button onClick={handleShowMore} variant="outlined">
+                Show More
+              </Button>
+            ) : (
+              <Box /> // empty box to balance layout
+            )}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }
